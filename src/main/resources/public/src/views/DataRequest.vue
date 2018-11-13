@@ -16,7 +16,7 @@
             </div>
             <div class="form-group row">
                 <label class="col-sm-3 col-form-label col-form-label-sm">{{ labelName }}</label>
-                <vue-single-select 
+                <vue-single-select
                     v-model="model"
                     v-bind:options="models"
                     placeholder="Pick a model dataset"
@@ -34,7 +34,7 @@
     export default {
         name: "DataRequest",
         components: {
-          VueSingleSelect  
+          VueSingleSelect
         },
         data() {
             return {
@@ -75,7 +75,7 @@
                   this.errors.push(e)
                 })
             }
-        }
+        },
     }
 </script>
 
