@@ -6,7 +6,15 @@
                 <label for="claimer-collectivity" class="col-sm-3 col-form-label col-form-label-sm">
                     Organization
                 </label>
-                <input id="claimer-collectivity" v-model="dataRequest.organization"/>
+                <vue-bootstrap-typeahead
+                    id="claimer-collectivity"
+                    v-model="dataRequest.organization"
+                    v-bind:data="organizations"
+                    placeholder="Find a Collectivity"
+                    v-bind:minMatchingChars="minMatch"
+                    v-bind:maxMatches="maxMatch"
+                    ref="clamercollectivity"
+                />
             </div>
             <div class="form-group row">
                 <label for="claimer-email" class="col-sm-3 col-form-label col-form-label-sm">
@@ -52,6 +60,7 @@
                     model: ''
                 },
                 models: [],
+                organizations: [],
                 errors: [],
                 response: {},
                 minMatch: 0,
@@ -71,12 +80,14 @@
                     this.dataRequest = response.data
                     //Even if typeahead value = dataRequest.model - we need to fullfill typeahead inputValue to display value
                     this.$refs.typeahead.$data.inputValue = this.dataRequest.model
+                    this.$refs.clamercollectivity.$data.inputValue = this.dataRequest.organization
                   })
                   .catch(e => {
                     this.errors.push(e)
                   })
             }
 
+            //Get first hundred models from datacore
             axios.get('/api/data_access_request/123456789/model')
                 .then(response => {
                     this.models = response.data
@@ -84,12 +95,33 @@
                 .catch(e => {
                     this.errors.push(e)
                 })
+
+            //Get first hundred organization name from datacore
+            axios.get('/api/data_access_request/123456789/organisation?name=')
+                .then(response => {
+                    response.data.forEach( data => {
+                        this.organizations.push(data.denominationUniteLegale)
+                    })
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
+
+            console.log(this.errors)
+            
         },
         beforeRouteUpdate (to, from, next) {
             next()
-            this.dataRequest = {}
+            this.dataRequest = {
+                id: null,
+                    nom: '',
+                    email: '',
+                    organization: '',
+                    model: ''
+            }
             //Empty typeahead inputValue when updating route
-            this.$refs.typeahead.$data.inputValue = this.dataRequest.model
+            this.$refs.typeahead.$data.inputValue = ''
+            this.$refs.clamercollectivity.$data.inputValue = ''
         },
         methods: {
             createDataRequestModel() {
@@ -110,13 +142,27 @@
                 .catch(e => {
                     this.errors.push(e)
                 })
+            },
+            getOrganizations(name){
+                this.organizations = []
+                axios.get('/api/data_access_request/123456789/organisation?name=' + name)
+                .then(response => {
+                    response.data.forEach( data => {
+                        this.organizations.push(data.denominationUniteLegale)
+                    })
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
             }
         },
         watch: {
             dataRequest: {
-                handler: function (val) {
+                handler: function (val, oldVal) {
                     if(val.model != '' && val.model != null)
                         this.getModels(val.model)
+                    if(val.organization != '' && val.organization != null)
+                        this.getOrganizations(val.organization)
                 },
                 deep: true
             }
