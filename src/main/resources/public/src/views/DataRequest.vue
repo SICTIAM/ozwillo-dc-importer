@@ -97,7 +97,7 @@
                 })
 
             //Get first hundred organization name from datacore
-            axios.get('/api/data_access_request/123456789/organisation?name=')
+            axios.get('/api/data_access_request/organisation?name=')
                 .then(response => {
                     response.data.forEach( data => {
                         this.organizations.push(data.denominationUniteLegale)
@@ -145,7 +145,7 @@
             },
             getOrganizations(name){
                 this.organizations = []
-                axios.get('/api/data_access_request/123456789/organisation?name=' + name)
+                axios.get('/api/data_access_request/organisation?name=' + name)
                 .then(response => {
                     response.data.forEach( data => {
                         this.organizations.push(data.denominationUniteLegale)
