@@ -12,13 +12,13 @@
             </thead>
             <tbody>
                 <tr v-for="dataRequest in dataRequests">
+                    <td>{{ dataRequest.nom }}</td>
                     <td>
                         <router-link :to="{ name: 'request', params: { id: dataRequest.id }}">
-                          {{ dataRequest.nom }}
+                          {{ dataRequest.organization }}
                         </router-link>
                     </td>
                     <td>{{ dataRequest.model }}</td>
-                    <td>{{ dataRequest.organization }}</td>
                     <td>{{ dataRequest.state }}</td>
                 </tr>
             </tbody>
