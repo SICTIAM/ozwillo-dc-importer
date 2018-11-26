@@ -13,7 +13,7 @@
                     placeholder="Find a Collectivity"
                     v-bind:minMatchingChars="minMatch"
                     v-bind:maxMatches="maxMatch"
-                    ref="clamercollectivity"
+                    ref="claimercollectivity"
                 />
             </div>
             <div class="form-group row">
@@ -42,6 +42,7 @@
 
 <script>
     import axios from 'axios'
+    import _ from 'lodash'
     import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
     import  VueRouter from 'vue-router'
 
@@ -67,6 +68,17 @@
                 maxMatch: 50
             }
         },
+        watch: {
+            dataRequest: {
+                handler: function (val, oldVal) {
+                    if(val.model != '' && val.model != null)
+                        this.debouncedGetModels()
+                    if(val.organization != '' && val.organization != null)
+                        this.debouncedGetOrganizations()
+                },
+                deep: true
+            }
+        },
         computed: {
             disabled: function(){
                 return(this.dataRequest.organization == '' || this.dataRequest.email == '' || (this.dataRequest.model == '' || this.dataRequest.model === null))
@@ -80,7 +92,7 @@
                     this.dataRequest = response.data
                     //Even if typeahead value = dataRequest.model - we need to fullfill typeahead inputValue to display value
                     this.$refs.typeahead.$data.inputValue = this.dataRequest.model
-                    this.$refs.clamercollectivity.$data.inputValue = this.dataRequest.organization
+                    this.$refs.claimercollectivity.$data.inputValue = this.dataRequest.organization
                   })
                   .catch(e => {
                     this.errors.push(e)
@@ -97,7 +109,7 @@
                 })
 
             //Get first hundred organization name from datacore
-            axios.get('/api/data_access_request/organisation?name=')
+            axios.get('/api/data_access_request/organizations?name=')
                 .then(response => {
                     response.data.forEach( data => {
                         this.organizations.push(data.denominationUniteLegale)
@@ -106,9 +118,11 @@
                 .catch(e => {
                     this.errors.push(e)
                 })
-
-            console.log(this.errors)
             
+        },
+        created (){
+            this.debouncedGetModels = _.debounce(this.getModels, 500)
+            this.debouncedGetOrganizations = _.debounce(this.getOrganizations, 500)
         },
         beforeRouteUpdate (to, from, next) {
             next()
@@ -121,7 +135,7 @@
             }
             //Empty typeahead inputValue when updating route
             this.$refs.typeahead.$data.inputValue = ''
-            this.$refs.clamercollectivity.$data.inputValue = ''
+            this.$refs.claimercollectivity.$data.inputValue = ''
         },
         methods: {
             createDataRequestModel() {
@@ -134,8 +148,8 @@
                         this.errors.push(e)
                     })
             },
-            getModels(name){
-                axios.get('/api/data_access_request/123456789/model?name=' + name)
+            getModels (){
+                axios.get('/api/data_access_request/123456789/model?name=' + this.dataRequest.model)
                 .then(response => {
                     this.models = response.data
                 })
@@ -143,9 +157,9 @@
                     this.errors.push(e)
                 })
             },
-            getOrganizations(name){
+            getOrganizations (){
                 this.organizations = []
-                axios.get('/api/data_access_request/organisation?name=' + name)
+                axios.get('/api/data_access_request/organizations?name=' + this.dataRequest.organization)
                 .then(response => {
                     response.data.forEach( data => {
                         this.organizations.push(data.denominationUniteLegale)
@@ -154,17 +168,6 @@
                 .catch(e => {
                     this.errors.push(e)
                 })
-            }
-        },
-        watch: {
-            dataRequest: {
-                handler: function (val, oldVal) {
-                    if(val.model != '' && val.model != null)
-                        this.getModels(val.model)
-                    if(val.organization != '' && val.organization != null)
-                        this.getOrganizations(val.organization)
-                },
-                deep: true
             }
         }
     }
