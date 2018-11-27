@@ -8,8 +8,8 @@
                 </label>
                 <vue-bootstrap-typeahead
                     id="claimer-collectivity"
-                    v-model="dataRequest.organization"
-                    v-bind:data="organizations"
+                    v-model="organization.legalName"
+                    v-bind:data="organizationsNameList"
                     placeholder="Find a Collectivity"
                     v-bind:minMatchingChars="minMatch"
                     v-bind:maxMatches="maxMatch"
@@ -61,7 +61,12 @@
                     model: ''
                 },
                 models: [],
+                organization: {
+                        legalName: '',
+                        siret: '',
+                    },
                 organizations: [],
+                organizationsNameList: [],
                 errors: [],
                 response: {},
                 minMatch: 0,
@@ -73,15 +78,25 @@
                 handler: function (val, oldVal) {
                     if(val.model != '' && val.model != null)
                         this.debouncedGetModels()
-                    if(val.organization != '' && val.organization != null)
+                },
+                deep: true
+            },
+            organization: {
+                handler (val, oldVal){
+                    if(val.legalName != '' && val.legalName != null)
                         this.debouncedGetOrganizations()
                 },
                 deep: true
+            },
+            organizations: {
+                handler (val, oldVal){
+                    this.updateOrganization()
+                }
             }
         },
         computed: {
             disabled: function(){
-                return(this.dataRequest.organization == '' || this.dataRequest.email == '' || (this.dataRequest.model == '' || this.dataRequest.model === null))
+                return(this.organization.legalName == '' || this.dataRequest.email == '' || (this.dataRequest.model == '' || this.dataRequest.model === null || this.organizations.length > 1))
             }
         },
         beforeCreate() {
@@ -90,9 +105,11 @@
                 axios.get(`/api/data_access_request/${this.$route.params.id}`)
                   .then(response => {
                     this.dataRequest = response.data
+
+                    this.updateOrganizationBySiret()
+
                     //Even if typeahead value = dataRequest.model - we need to fullfill typeahead inputValue to display value
                     this.$refs.typeahead.$data.inputValue = this.dataRequest.model
-                    this.$refs.claimercollectivity.$data.inputValue = this.dataRequest.organization
                   })
                   .catch(e => {
                     this.errors.push(e)
@@ -107,20 +124,12 @@
                 .catch(e => {
                     this.errors.push(e)
                 })
-
-            //Get first hundred organization name from datacore
-            axios.get('/api/data_access_request/organizations?name=')
-                .then(response => {
-                    response.data.forEach( data => {
-                        this.organizations.push(data.denominationUniteLegale)
-                    })
-                })
-                .catch(e => {
-                    this.errors.push(e)
-                })
-            
         },
         created (){
+
+            //Get first hundred organization name from datacore
+            this.getOrganizations()
+
             this.debouncedGetModels = _.debounce(this.getModels, 500)
             this.debouncedGetOrganizations = _.debounce(this.getOrganizations, 500)
         },
@@ -133,6 +142,10 @@
                     organization: '',
                     model: ''
             }
+            this.organization = {
+                        legalName: '',
+                        siret: '',
+                    }
             //Empty typeahead inputValue when updating route
             this.$refs.typeahead.$data.inputValue = ''
             this.$refs.claimercollectivity.$data.inputValue = ''
@@ -159,15 +172,36 @@
             },
             getOrganizations (){
                 this.organizations = []
-                axios.get('/api/data_access_request/organizations?name=' + this.dataRequest.organization)
+                this.organizationsNameList = []
+                axios.get('/api/data_access_request/organizations?name=' + this.organization.legalName)
                 .then(response => {
                     response.data.forEach( data => {
-                        this.organizations.push(data.denominationUniteLegale)
+                        this.organizationsNameList.push(data.denominationUniteLegale)
+                        this.organizations.push(data)
                     })
                 })
                 .catch(e => {
                     this.errors.push(e)
                 })
+            },
+            updateOrganizationBySiret (){
+                var splitedUri = this.dataRequest.organization.split("/")
+                var siret = splitedUri[splitedUri.length - 1]
+
+                axios.get('/api/data_access_request/organizations?siret=' + siret)
+                .then(response => {
+                    this.organization.legalName = response.data[0].denominationUniteLegale
+                    this.$refs.claimercollectivity.$data.inputValue = this.organization.legalName
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
+            },
+            updateOrganization (){
+                if(this.organizations.length == 1){
+                            this.organization.siret = this.organizations[0].siret
+                            this.dataRequest.organization = "http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/" + this.organization.siret
+                        }
             }
         }
     }
