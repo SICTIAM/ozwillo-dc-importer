@@ -1,43 +1,68 @@
 <template>
     <div class="container">
         <h2>Access validation</h2>
-        <data-access-validation></data-access-validation>
-        <router-link to="/">
-            <input class="validation-buttons" type="button" @click="validAccess" value="Valid" v-bind:disabled="disabled">
-        </router-link>
-        <router-link to="/">
-            <input class="validation-buttons" type="button" @click="refuseAccess" value="Refuse">
-        </router-link>
+        <p>{{ dataRequest.model }}</p>
+        <div class="form-check">
+            <input id="agreeAllData" class="form-check-input" type="checkbox" :value="agreeAllData" @change="handleAgreeAllData">
+            <label for="agreeAllData" class="form-check-label">
+                Authorize access to all data of "{{ dataRequest.model }}" model
+            </label>
+        </div>
+        <button class="btn btn-outline-primary" type="button" @click="validAccess" :disabled="!agreeAllData">
+            Valid
+        </button>
+        <button class="btn btn-outline-primary" type="button" @click="refuseAccess">
+            Refuse
+        </button>
     </div>
 </template>
 
 <script>
-import DataAccessValidation from '../components/organisms/DataAccessValidation'
-export default {
-    name: 'Validation',
-    components: {
-        DataAccessValidation
-    },
-    data () {
-        return {
-            disabled: false
-        }
-    },
-    methods: {
-        validAccess: function(){
-            // Here PUT API with id in request url parameter to update document state to VALIDATED
-            console.log('state changed for \"VALIDATED\"')
+    import axios from 'axios'
+
+    export default {
+        name: 'Validation',
+        data() {
+            return {
+                dataRequest: {},
+                errors: [],
+                agreeAllData: false
+            }
         },
-        refuseAccess: function(){
-            // Here PUT API with id in request url parameter to update document state to REFUSED
-            console.log('state changed for \"REFUSED\"')
+        beforeCreate() {
+            axios.get(`/api/data_access_request/${this.$route.params.id}`)
+                .then(response => {
+                    this.dataRequest = response.data
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
+        },
+        methods: {
+            handleAgreeAllData() {
+              this.agreeAllData = !this.agreeAllData
+            },
+            validAccess() {
+                this.modifyStateOfRequest('valid', this.dataRequest.id)
+            },
+            refuseAccess() {
+                this.modifyStateOfRequest('reject', this.dataRequest.id)
+            },
+            modifyStateOfRequest(action, id) {
+                axios.put(`/api/data_access_request/${action}/${id}`, this.dataRequest)
+                    .then(() => {
+                        this.$router.push({ name: 'dashboard' })
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+            }
         }
     }
-}
 </script>
 
 <style scoped>
-    .validation-buttons{
+    .validation-buttons {
         margin-top: 50px;
         margin-right: 5px;
     }

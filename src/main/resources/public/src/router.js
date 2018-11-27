@@ -20,7 +20,7 @@ export default new Router({
           component: DataRequest
         },
         {
-            path: '/tovalidate',
+            path: '/request/validation/:id',
             name: 'validation',
             component: Validation
         }
