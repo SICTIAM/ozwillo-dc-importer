@@ -8,7 +8,7 @@
                 </label>
                 <vue-bootstrap-typeahead
                     id="claimer-collectivity"
-                    v-model="organization.legalName"
+                    v-model="organization.nameAndSiret"
                     v-bind:data="organizationsNameList"
                     placeholder="Find a Collectivity"
                     v-bind:minMatchingChars="minMatch"
@@ -64,8 +64,8 @@
                 organization: {
                         legalName: '',
                         siret: '',
+                        nameAndSiret: ''
                     },
-                organizations: [],
                 organizationsNameList: [],
                 errors: [],
                 response: {},
@@ -83,20 +83,17 @@
             },
             organization: {
                 handler (val, oldVal){
-                    if(val.legalName != '' && val.legalName != null)
-                        this.debouncedGetOrganizations()
+                    this.organization.legalName = this.organization.nameAndSiret.split(' //')[0]
+                    this.organization.siret = this.organization.nameAndSiret.split('// ')[1]
+                    this.dataRequest.organization = "http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/" + this.organization.siret
+                    this.debouncedGetOrganizations()
                 },
                 deep: true
-            },
-            organizations: {
-                handler (val, oldVal){
-                    this.updateOrganization()
-                }
             }
         },
         computed: {
             disabled: function(){
-                return(this.organization.legalName == '' || this.dataRequest.email == '' || (this.dataRequest.model == '' || this.dataRequest.model === null || this.organizations.length > 1))
+                return(this.organization.legalName == '' || this.dataRequest.email == '' || (this.dataRequest.model == '' || this.dataRequest.model === null))
             }
         },
         beforeCreate() {
@@ -145,6 +142,7 @@
             this.organization = {
                         legalName: '',
                         siret: '',
+                        nameAndSiret: ''
                     }
             //Empty typeahead inputValue when updating route
             this.$refs.typeahead.$data.inputValue = ''
@@ -171,13 +169,11 @@
                 })
             },
             getOrganizations (){
-                this.organizations = []
                 this.organizationsNameList = []
                 axios.get('/api/data_access_request/organizations?name=' + this.organization.legalName)
                 .then(response => {
                     response.data.forEach( data => {
-                        this.organizationsNameList.push(data.denominationUniteLegale)
-                        this.organizations.push(data)
+                        this.organizationsNameList.push(data.denominationUniteLegale + ' // ' + data.siret)
                     })
                 })
                 .catch(e => {
@@ -191,17 +187,12 @@
                 axios.get('/api/data_access_request/organizations?siret=' + siret)
                 .then(response => {
                     this.organization.legalName = response.data[0].denominationUniteLegale
-                    this.$refs.claimercollectivity.$data.inputValue = this.organization.legalName
+                    this.organization.nameAndSiret = response.data[0].denominationUniteLegale + ' // ' + siret
+                    this.$refs.claimercollectivity.$data.inputValue = this.organization.nameAndSiret
                 })
                 .catch(e => {
                     this.errors.push(e)
                 })
-            },
-            updateOrganization (){
-                if(this.organizations.length == 1){
-                            this.organization.siret = this.organizations[0].siret
-                            this.dataRequest.organization = "http://data.ozwillo.com/dc/type/orgfr:Organisation_0/FR/" + this.organization.siret
-                        }
             }
         }
     }
