@@ -8,8 +8,11 @@
                 </label>
                 <vue-bootstrap-typeahead
                     id="claimer-organization"
+                    ref="claimerorganization"
                     placeholder="Find a organization"
+                    :minMatchingChars="0"
                     v-model="organizationSearch"
+                    :append="organizationSelected.siret"
                     :data="organizations"
                     :serializer="displayingResultOfOrganizationSearch"
                     @hit="organizationSelected = $event"/>
@@ -26,7 +29,9 @@
                 </label>
                 <vue-bootstrap-typeahead
                     id="claimer-model"
+                    ref="claimermodel"
                     placeholder="Find a model of dataset"
+                    :minMatchingChars="0"
                     v-model="modelSearch"
                     :data="models"
                     @hit="modelSelected = $event"/>
@@ -41,6 +46,8 @@
     import debounce from 'lodash/debounce'
     import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
     import VueRouter from 'vue-router'
+
+    //TODO : Find better than $ref... for displaying specific value in vue-bootstrap-typeahead input
 
     export default {
         name: "dataAccessRequest",
@@ -57,7 +64,7 @@
                     model: ''
                 },
                 errors: [],
-                organizationSelected: null,
+                organizationSelected: {},
                 organizationSearch: '',
                 organizations: [],
                 modelSelected: '',
@@ -67,7 +74,13 @@
         },
         watch: {
             organizationSearch: debounce(function(name) { this.getOrganizations(name) }, 500),
-            modelSearch: debounce(function(name) { this.getModels(name) }, 500)
+            modelSearch: debounce(function(name) { this.getModels(name) }, 500),
+            organizationSelected: {
+                handler(val, oldVal){
+                    this.$refs.claimerorganization.$data.inputValue = val.denominationUniteLegale
+                },
+                deep: true
+            }
         },
         computed: {
             disabled: function(){
@@ -79,7 +92,10 @@
                 axios.get(`/api/data_access_request/${this.$route.params.id}`)
                   .then(response => {
                       this.dataAccessRequest = response.data
-                      this.$refs.typeahead.$data.inputValue = this.dataAccessRequest.model
+                      this.modelSelected = this.dataAccessRequest.model
+                      this.$refs.claimermodel.$data.inputValue = this.dataAccessRequest.model
+
+                      this.updateOrganizationBySiret()
                   })
                   .catch(e => {
                       this.errors.push(e)
@@ -94,6 +110,12 @@
                 email: '',
                 organization: '',
                 model: ''}
+            
+            this.organizationSelected = {}
+            this.modelSelected = ''
+
+            this.$refs.claimermodel.$data.inputValue = this.dataAccessRequest.model
+            this.$refs.claimerorganization.$data.inputValue = this.organizationSearch
         },
         methods: {
             displayingResultOfOrganizationSearch(organization) {
@@ -112,8 +134,8 @@
                         this.errors.push(e)
                     })
             },
-            getModels() {
-                axios.get('/api/data_access_request/123456789/model', {params: {name: this.dataAccessRequest.model}})
+            getModels(name) {
+                axios.get('/api/data_access_request/123456789/model', {params: {name: name}})
                     .then(response => {
                         this.models = response.data
                     })
@@ -128,6 +150,19 @@
                     })
                     .catch(e => {
                         this.errors.push(e)
+                    })
+            },
+            updateOrganizationBySiret (){
+	                var splitedUri = this.dataAccessRequest.organization.split("/")
+	                var siret = splitedUri[splitedUri.length - 1]
+
+	                axios.get('/api/data_access_request/organizations?siret=' + siret)
+	                .then(response => {
+	                    this.organizationSelected = response.data[0]
+	                    this.$refs.claimerorganization.$data.inputValue = this.organizationSelected.denominationUniteLegale
+	                })
+	                .catch(e => {
+	                    this.errors.push(e)
                     })
             }
         }
