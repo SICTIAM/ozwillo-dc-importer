@@ -13,7 +13,7 @@
             <tbody>
                 <tr v-for="dataRequest in dataRequests">
                     <td>
-                        <router-link :to="{ name: 'validation', params: { id: dataRequest.id }}">
+                        <router-link :to="{ name: 'check', params: { id: dataRequest.id }}">
                             {{ dataRequest.model }}
                         </router-link>
                     </td>

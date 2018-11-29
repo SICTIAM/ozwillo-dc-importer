@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h2>Access validation</h2>
+        <h2>Data access check</h2>
         <p>{{ dataRequest.model }}</p>
         <div class="form-check">
             <input id="agreeAllData" class="form-check-input" type="checkbox" :value="agreeAllData" @change="handleAgreeAllData">
@@ -8,7 +8,7 @@
                 Authorize access to all data of "{{ dataRequest.model }}" model
             </label>
         </div>
-        <button class="btn btn-outline-primary" type="button" @click="validAccess" :disabled="!agreeAllData">
+        <button class="btn btn-outline-primary" type="button" @click="validateAccess" :disabled="!agreeAllData">
             Valid
         </button>
         <button class="btn btn-outline-primary" type="button" @click="refuseAccess">
@@ -21,7 +21,7 @@
     import axios from 'axios'
 
     export default {
-        name: 'Validation',
+        name: 'CheckDataAccess',
         data() {
             return {
                 dataRequest: {},
@@ -42,7 +42,7 @@
             handleAgreeAllData() {
               this.agreeAllData = !this.agreeAllData
             },
-            validAccess() {
+            validateAccess() {
                 this.modifyStateOfRequest('valid', this.dataRequest.id)
             },
             refuseAccess() {
