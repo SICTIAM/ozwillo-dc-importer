@@ -235,7 +235,7 @@ class DatacoreService(private val kernelProperties: KernelProperties) {
         return Mono.just(results)
     }
 
-    fun findModels(limit: Int, name: String): Flux<DCBusinessResourceLight>{
+    fun findModels(limit: Int, name: String): Flux<DCModel>{
 
         val uriComponentsBuilder = UriComponentsBuilder.fromUriString(datacoreUrl)
             .path("/dc/type/dcmo:model_0")
@@ -255,9 +255,35 @@ class DatacoreService(private val kernelProperties: KernelProperties) {
                     .header("Authorization", "Bearer $accessToken")
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToFlux(DCBusinessResourceLight::class.java)
+                    .bodyToFlux(DCModel::class.java)
             }
         }catch (e: HttpClientErrorException) {
+            Flux.empty() // this.getDCResultFromHttpErrorException(e)
+        }
+    }
+
+    fun findModel(project: String, model: String): Flux<DCModel>{
+
+        val uri = UriComponentsBuilder.fromUriString(datacoreUrl)
+            .path("/dc/type/dcmo:model_0/{type}")
+            .build()
+            .expand(model)
+            .encode()
+            .toUriString()
+
+        LOGGER.debug("Fetching model, URI String is {}", uri)
+
+        return try {
+            val client: WebClient = WebClient.create(uri)
+            getAccessToken().flatMapMany { accessToken ->
+                client.get()
+                    .header("Authorization", "Bearer $accessToken")
+                    .header("X-Datacore-Project", project)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToFlux(DCModel::class.java)
+            }
+        } catch (e: HttpClientErrorException) {
             Flux.empty() // this.getDCResultFromHttpErrorException(e)
         }
     }

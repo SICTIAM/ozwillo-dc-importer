@@ -31,10 +31,21 @@
                     id="claimer-model"
                     ref="claimermodel"
                     placeholder="Find a model of dataset"
-                    :minMatchingChars="0"
                     v-model="modelSearch"
                     :data="models"
-                    @hit="modelSelected = $event"/>
+                    :serializer="displayingResultOfModelSearch"
+                    @hit="handleModelSelected($event)"/>
+            </div>
+            <div class="form-group row" v-if="modelSelected != null">
+                <label for="fields-model" class="col-sm-3 col-form-label col-form-label-sm">
+                    Fields
+                </label>
+                <ul id="fields-model" class="list-group">
+                    <li class="list-group-item" v-for="field in modelSelected.fields">
+                        <input type="checkbox" :id="field.name" v-model="field.requested">
+                        <label :for="field.name">{{ field.name }}</label>
+                    </li>
+                </ul>
             </div>
             <input type="button" @click="createDataAccessRequest" value="submit" v-bind:disabled="disabled">
         </form>
@@ -42,6 +53,7 @@
 </template>
 
 <script>
+    import Vue from 'vue'
     import axios from 'axios'
     import debounce from 'lodash/debounce'
     import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
@@ -67,7 +79,7 @@
                 organizationSelected: {},
                 organizationSearch: '',
                 organizations: [],
-                modelSelected: '',
+                modelSelected: null,
                 modelSearch: '',
                 models: []
             }
@@ -84,7 +96,7 @@
         },
         computed: {
             disabled: function(){
-                return (this.organizationSelected == false || this.dataAccessRequest.email == '' || this.modelSelected == '')
+                return (this.organizationSelected === false || this.dataAccessRequest.email === '' || this.modelSelected === '')
             }
         },
         beforeCreate() {
@@ -118,13 +130,21 @@
             this.$refs.claimerorganization.$data.inputValue = this.organizationSearch
         },
         methods: {
+            handleModelSelected(model) {
+                model.fields.map(field => Vue.util.defineReactive(field, 'requested' , true))
+                this.modelSelected = model
+            },
+            displayingResultOfModelSearch(model) {
+                return model.name
+            },
             displayingResultOfOrganizationSearch(organization) {
                 return `${organization.denominationUniteLegale}, ${organization.siret}`
             },
             createDataAccessRequest() {
                 Object.assign(this.dataAccessRequest, {
                     organization: this.organizationSelected.uri,
-                    model: this.modelSelected
+                    model: this.modelSelected.id,
+                    fields: this.modelSelected.fields
                 })
                 axios.post(`/api/data-access`, this.dataAccessRequest)
                     .then(() => {
