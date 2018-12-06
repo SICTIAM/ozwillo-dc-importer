@@ -74,7 +74,7 @@ class Routes(
             PUT("/type/{type}", datacoreHandler::updateResourceWithOrganization)
             GET("/organizations", datacoreHandler::getAllOrganization)
             GET("/models", datacoreHandler::getModels)
-            GET("/model/{project}/{type}", datacoreHandler::getModel)
+            GET("/model/{type}", datacoreHandler::getModel)
         }
 
         "/configuration".nest {

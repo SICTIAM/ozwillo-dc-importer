@@ -66,11 +66,10 @@ class DatacoreHandler(
     }
 
     fun getModel(req: ServerRequest): Mono<ServerResponse> {
-        val project = req.pathVariable("project")
         val type = req.pathVariable("type")
 
         return try {
-            val dcModel = datacoreService.findModel(project, type).collectList()
+            val dcModel = datacoreService.findModel(type)
             ok().contentType(MediaType.APPLICATION_JSON).body(dcModel)
         }catch (e: HttpClientErrorException){
             status(e.statusCode).body(BodyInserters.fromObject(e.message!!))

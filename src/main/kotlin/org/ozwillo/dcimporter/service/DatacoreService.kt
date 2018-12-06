@@ -262,12 +262,12 @@ class DatacoreService(private val kernelProperties: KernelProperties) {
         }
     }
 
-    fun findModel(project: String, model: String): Flux<DCModel>{
+    fun findModel(type: String): Mono<DCModel>{
 
         val uri = UriComponentsBuilder.fromUriString(datacoreUrl)
             .path("/dc/type/dcmo:model_0/{type}")
             .build()
-            .expand(model)
+            .expand(type)
             .encode()
             .toUriString()
 
@@ -275,16 +275,16 @@ class DatacoreService(private val kernelProperties: KernelProperties) {
 
         return try {
             val client: WebClient = WebClient.create(uri)
-            getAccessToken().flatMapMany { accessToken ->
-                client.get()
-                    .header("Authorization", "Bearer $accessToken")
-                    .header("X-Datacore-Project", project)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToFlux(DCModel::class.java)
-            }
+
+            return client.get()
+                .header("Authorization", "Bearer ${getSyncAccessToken()}")
+                .header("X-Datacore-Project", "oasis.main")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(DCModel::class.java)
+
         } catch (e: HttpClientErrorException) {
-            Flux.empty() // this.getDCResultFromHttpErrorException(e)
+            Mono.empty()
         }
     }
 

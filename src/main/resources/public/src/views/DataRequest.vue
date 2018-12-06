@@ -96,7 +96,7 @@
         },
         computed: {
             disabled: function(){
-                return (this.organizationSelected === false || this.dataAccessRequest.email === '' || this.modelSelected === '')
+                return (this.organizationSelected === false || this.dataAccessRequest.email === '' || this.modelSelected === null)
             }
         },
         beforeCreate() {
@@ -155,9 +155,19 @@
                     })
             },
             getModels(name) {
+                if(this.modelSearch.length <= 0) this.modelSelected = null
                 axios.get('/dc/models', {params: {name: name}})
                     .then(response => {
                         this.models = response.data
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
+            },
+            getModel(type) {
+                axios.get(`/dc/model/${type}`)
+                    .then(response => {
+                        this.modelSelected = response
                     })
                     .catch(e => {
                         this.errors.push(e)
