@@ -83,7 +83,7 @@ class DataAccessRequestHandler(
                             )
                         ).subscribe()
 
-                        try {
+                        try { //TODO: #5350 decoupling of the e-mail sending feature
                             emailService.sendSimpleMessage(
                                 currentDataAccessRequest.email,
                                 "[DC-Importer] Your data access request ${state.name.toLowerCase()}",
@@ -91,7 +91,7 @@ class DataAccessRequestHandler(
                         } catch (sendFailedException: SendFailedException) {
                             throwableToResponse(sendFailedException)
                         }
-                        
+
                         ok().contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
                     }
             }
