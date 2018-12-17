@@ -86,6 +86,17 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
             .onErrorResume(this::throwableToResponse)
     }
 
+    fun clone(req: ServerRequest): Mono<ServerResponse> {
+        return req.bodyToMono<BusinessAppConfiguration>()
+            .flatMap { connector ->
+                connectorsService.clone(connector.id!!, connector.organizationSiret).subscribe()
+                ok().contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
+            }
+            .onErrorResume { e ->
+                this.throwableToResponse(e)
+            }
+    }
+
     fun updateConnectors(req: ServerRequest): Mono<ServerResponse> {
         val siret = req.pathVariable("siret")
         val appName = req.pathVariable("applicationName")

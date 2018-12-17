@@ -81,6 +81,27 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
             }
     }
 
+    fun clone(id: String, siret: String): Mono<BusinessAppConfiguration>{
+        val fallback: Mono<BusinessAppConfiguration> =
+                Mono.error(EmptyException("No connector found with id $id"))
+
+        return businessAppConfigurationRepository.findById(id)
+            .switchIfEmpty(fallback)
+            .flatMap { existingConnector ->
+                businessAppConfigurationRepository.save(
+                    BusinessAppConfiguration(
+                        baseUrl = existingConnector.baseUrl,
+                        organizationSiret = siret,
+                        instanceId = existingConnector.instanceId,
+                        login = existingConnector.login,
+                        password = existingConnector.password,
+                        applicationName = existingConnector.applicationName,
+                        secretOrToken = existingConnector.secretOrToken
+                    )
+                )
+            }
+    }
+
     fun update(siret: String, appName: String, monoBusinessAppConfiguration: Mono<BusinessAppConfiguration>):Mono<BusinessAppConfiguration>{
 
         val fallback: Mono<BusinessAppConfiguration> =

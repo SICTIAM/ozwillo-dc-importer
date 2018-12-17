@@ -41,7 +41,11 @@
                             <td>{{connector.applicationName}}</td>
                             <td>{{findOrganizationNameInMap(connector.organizationSiret)}}</td>
                             <td>{{connector.organizationSiret}}</td>
-                            <td>++</td>
+                            <td>
+                                <router-link :to="{ name: 'clone', params: { id: connector.id, appName: connector.applicationName, siret: connector.organizationSiret }}">
+                                    ++
+                                </router-link>
+                            </td>
                             <td>X</td>
                         </tr>
                     </tbody>
