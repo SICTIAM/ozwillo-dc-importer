@@ -89,8 +89,10 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
     fun clone(req: ServerRequest): Mono<ServerResponse> {
         return req.bodyToMono<BusinessAppConfiguration>()
             .flatMap { connector ->
-                connectorsService.clone(connector.id!!, connector.organizationSiret).subscribe()
-                ok().contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
+                connectorsService.clone(connector.id!!, connector.organizationSiret)
+            }
+            .flatMap { status ->
+                status(status).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
             }
             .onErrorResume { e ->
                 this.throwableToResponse(e)
