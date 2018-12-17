@@ -117,11 +117,26 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
             }
     }
 
-    fun deleteConnectors(req: ServerRequest): Mono<ServerResponse> {
+    fun delete(req: ServerRequest): Mono<ServerResponse> {
+        val id = req.pathVariable("id")
+
+        return connectorsService.delete(id)
+            .flatMap {
+                status(HttpStatus.NO_CONTENT).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
+            }
+            .onErrorResume { e ->
+                when(e){
+                    is EmptyException -> status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromObject(e.message))
+                    else -> this.throwableToResponse(e)
+                }
+            }
+    }
+
+    fun deleteBySiretAndAppName(req: ServerRequest): Mono<ServerResponse> {
         val siret = req.pathVariable("siret")
         val appName = req.pathVariable("applicationName")
 
-        return connectorsService.delete(siret, appName)
+        return connectorsService.deleteBySiretAndAppName(siret, appName)
             .flatMap {
                 ServerResponse.status(HttpStatus.NO_CONTENT).body(BodyInserters.empty<String>())
             }

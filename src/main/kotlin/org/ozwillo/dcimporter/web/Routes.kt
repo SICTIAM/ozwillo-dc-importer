@@ -87,10 +87,11 @@ class Routes(
             GET("/connectors", connectorsHandler::getAllWithoutSecret)
             GET("/connectors/{id}", connectorsHandler::get)
             POST("/connectors/{id}/clone", connectorsHandler::clone)
+            DELETE("/connectors/{id}", connectorsHandler::delete)
             GET("/{applicationName}/{siret}/connectors", connectorsHandler::getAllByAppName)
             POST("/{applicationName}/{siret}/connectors", connectorsHandler::createNewConnectors)
             PUT("/{applicationName}/{siret}/connectors", connectorsHandler::updateConnectors)
-            DELETE("/{applicationName}/{siret}/connectors", connectorsHandler::deleteConnectors)
+            DELETE("/{applicationName}/{siret}/connectors", connectorsHandler::deleteBySiretAndAppName)
         }
     }
 }

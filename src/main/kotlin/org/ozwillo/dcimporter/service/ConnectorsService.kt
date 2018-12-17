@@ -130,7 +130,20 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
             }
     }
 
-    fun delete(siret: String, appName: String):Mono<BusinessAppConfiguration>{
+    fun delete(id: String): Mono<BusinessAppConfiguration>{
+        val fallback: Mono<BusinessAppConfiguration> =
+                Mono.error(EmptyException("Connector not found for id: \"$id\""))
+
+        return businessAppConfigurationRepository.findById(id)
+            .switchIfEmpty(fallback)
+            .map { businessAppConfiguration ->
+                businessAppConfigurationRepository.deleteById(id)
+                    .subscribe()
+                businessAppConfiguration
+            }
+    }
+
+    fun deleteBySiretAndAppName(siret: String, appName: String):Mono<BusinessAppConfiguration>{
         val fallback: Mono<BusinessAppConfiguration> =
             Mono.error(EmptyException("Connector not found for application \"$appName\" and siret $siret"))
 
