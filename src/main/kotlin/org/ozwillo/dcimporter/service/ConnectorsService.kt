@@ -76,7 +76,7 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
                     HttpStatus.CONFLICT
                 }
             }
-            .onErrorResume { e ->
+            .onErrorResume {
                 HttpStatus.BAD_REQUEST.toMono()
             }
     }
@@ -136,10 +136,10 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
 
         return businessAppConfigurationRepository.findById(id)
             .switchIfEmpty(fallback)
-            .map { businessAppConfiguration ->
+            .flatMap {
                 businessAppConfigurationRepository.deleteById(id)
                     .subscribe()
-                businessAppConfiguration
+                Mono.empty<BusinessAppConfiguration>()
             }
     }
 
@@ -149,10 +149,10 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
 
         return businessAppConfigurationRepository.findByOrganizationSiretAndApplicationName(siret, appName)
             .switchIfEmpty(fallback)
-            .map {businessAppConfiguration ->
+            .flatMap {
                 businessAppConfigurationRepository.deleteByOrganizationSiretAndApplicationName(siret, appName)
                     .subscribe()
-                businessAppConfiguration
+                Mono.empty<BusinessAppConfiguration>()
             }
     }
 

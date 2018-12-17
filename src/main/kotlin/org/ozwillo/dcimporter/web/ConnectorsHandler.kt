@@ -122,7 +122,7 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
 
         return connectorsService.delete(id)
             .flatMap {
-                status(HttpStatus.NO_CONTENT).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
+                status(HttpStatus.NO_CONTENT).body(BodyInserters.empty<String>())
             }
             .onErrorResume { e ->
                 when(e){
