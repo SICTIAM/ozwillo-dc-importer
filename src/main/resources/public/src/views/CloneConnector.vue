@@ -85,8 +85,7 @@ export default {
             controlPassword: '',
             isOk: true,
             isNok: false,
-            errors: [],
-            duplicateErrorMessage: ''
+            errors: []
         }
     },
     watch: {
@@ -173,10 +172,6 @@ export default {
 </script>
 
 <style scoped>
-.error-message{
-    font-weight: bold;
-    color: red;
-}
 .passOk {
     background-color: #99ffd6;
     border-radius: 10px;
