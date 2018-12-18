@@ -1,7 +1,6 @@
 package org.ozwillo.dcimporter.web
 
 import org.ozwillo.dcimporter.model.BusinessAppConfiguration
-import org.ozwillo.dcimporter.repository.BusinessAppConfigurationRepository
 import org.ozwillo.dcimporter.service.ConnectorsService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -79,11 +78,15 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
             .flatMap { businessAppConfiguration ->
                 connectorsService.create(siret, appName, businessAppConfiguration)
             }
-            .flatMap { status ->
-                val message = if (status == HttpStatus.CONFLICT) "Connectors have already been created for application \"$appName\" and siret $siret, please update" else ""
-                status(status).body(BodyInserters.fromObject(message))
+            .flatMap {
+                status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
             }
-            .onErrorResume(this::throwableToResponse)
+            .onErrorResume{ e ->
+                when (e) {
+                    is ConflictException -> status(HttpStatus.CONFLICT).body(BodyInserters.fromObject(e.message))
+                    else -> this.throwableToResponse(e)
+                }
+            }
     }
 
     fun clone(req: ServerRequest): Mono<ServerResponse> {
@@ -91,11 +94,14 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
             .flatMap { connector ->
                 connectorsService.clone(connector.id!!, connector.organizationSiret)
             }
-            .flatMap { status ->
-                status(status).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
+            .flatMap {
+                status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.empty<String>())
             }
             .onErrorResume { e ->
-                this.throwableToResponse(e)
+                when (e) {
+                    is ConflictException -> status(HttpStatus.CONFLICT).body(BodyInserters.fromObject(e.message))
+                    else -> this.throwableToResponse(e)
+                }
             }
     }
 
@@ -161,3 +167,4 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
 }
 
 class EmptyException(override var message: String) : Exception(message)
+class ConflictException(override var message: String) : Exception(message)
