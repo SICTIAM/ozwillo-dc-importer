@@ -22,8 +22,40 @@
                     @hit="organizationSelected = $event"    
                 />
             </div>
-            <input type="button" value="Create" :disabled="disabled" @click="cloneConnector"/>
-            <input type="button" value="Cancel" @click="backToConnectorsManagament"/>
+            <div class="form-group row">
+                <label for="login-claimer" class="col-sm-3 col-form-label col-form-label-sm">
+                    Login
+                </label>
+                <input type="text" id="login-claimer" v-model="selectedConnector.login"/>
+            </div>
+            <div :class="checkPassword">
+                <div class="form-group row">
+                    <label for="password-claimer" class="col-sm-3 col-form-label col-form-label-sm">
+                        Password
+                    </label>
+                    <input type="password" id="password-claimer" v-model="selectedConnector.password" placeholder="Type password"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3"></div>
+                <input type="password" id="password-control-claimer" v-model="controlPassword" placeholder="Confirm password"/>
+            </div>
+            <div class="form-group row">
+                <label for="token-claimer" class="col-sm-3 col-form-label col-form-label-sm">
+                    Secret or Token
+                </label>
+                <input type="password" id="token-claimer" v-model="selectedConnector.secretOrToken"/>
+            </div>
+            <div class="form-group row">
+                <label for="instance-id-claimer" class="col-sm-3 col-form-label col-form-label-sm">
+                    Instance Id
+                </label>
+                <input type="text" id="instance-id-claimer" v-model="selectedConnector.instanceId"/>
+            </div>
+            <div class="for-group row">
+                <input type="button" value="Create" :disabled="disabled" @click="cloneConnector"/>
+                <input type="button" value="Cancel" @click="backToConnectorsManagament"/>
+            </div>
         </form>
     </div>
 </template>
@@ -50,6 +82,9 @@ export default {
             organizations: [],
             organizationSearch: '',
             organizationSelected: {},
+            controlPassword: '',
+            isOk: true,
+            isNok: false,
             errors: [],
             duplicateErrorMessage: ''
         }
@@ -62,18 +97,49 @@ export default {
                 this.$refs.neworganizationclaimer.$data.inputValue = val.denominationUniteLegale
             },
             deep: true
+        },
+        selectedConnector: {
+            handler (val, oldVal){
+                if (val.password !== this.controlPassword){
+                    this.isOk = false
+                    this.isNok = true
+                }else{
+                    this.isOk = true
+                    this.isNok = false
+                }
+            },
+            deep: true
+        },
+        controlPassword (val, oldVal){
+            if (val !== this.selectedConnector.password){
+                this.isOk = false
+                this.isNok = true
+            }else{
+                this.isOk = true
+                this.isNok = false
+            }
         }
     },
     computed: {
         disabled (){
-            return Object.keys(this.organizationSelected).length === 0
+            return (Object.keys(this.organizationSelected).length === 0 || this.controlPassword !== this.selectedConnector.password)
+        },
+        checkPassword (){
+            return {
+                passOk: this.isOk && !this.isNok,
+                passNok: !this.isOk && this.isNok
+            }
         }
     },
     created (){
         this.selectedConnector = {
             id: this.$route.params.id,
             applicationName: this.$route.params.appName,
-            baseUrl: ''
+            baseUrl: '',
+            login: '',
+            password: '',
+            instanceId: '',
+            secretOrToken: ''
         }
     },
     methods: {
@@ -109,7 +175,15 @@ export default {
 <style scoped>
 .error-message{
     font-weight: bold;
-    color: red; 
+    color: red;
+}
+.passOk {
+    background-color: #99ffd6;
+    border-radius: 10px;
+}
+.passNok {
+    background-color: #ffcccc;
+    border-radius: 10px;
 }
 </style>
 
