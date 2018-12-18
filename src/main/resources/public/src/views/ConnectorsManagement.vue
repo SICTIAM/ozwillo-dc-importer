@@ -153,9 +153,9 @@ export default {
                 this.errors.push(e)
             })
         },
-        getConnectors (siret, appName){
+        getConnectors (siret, application){
             this.connectors = []
-            axios.get('/configuration/connectors', {params: {siret: siret, application: appName}})
+            axios.get('/configuration/connectors', {params: {siret, application}})
                 .then(response => {
                     this.connectors = response.data
                 })
