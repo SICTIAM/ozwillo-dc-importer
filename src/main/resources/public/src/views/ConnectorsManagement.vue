@@ -93,14 +93,7 @@ export default {
         }
     },
     created (){
-        axios.get('/configuration/connectors')
-                .then(response => {
-                    this.connectors = response.data
-                    this.findOrganizationName(response.data)
-                })
-                .catch(e => {
-                    this.errors.push(e)
-                })
+        this.initializeConnectors()
     },
     methods: {
         checkOrganizationSearch (){
@@ -153,6 +146,16 @@ export default {
                 this.errors.push(e)
             })
         },
+        initializeConnectors (){
+            axios.get('/configuration/connectors')
+                .then(response => {
+                    this.connectors = response.data
+                    this.findOrganizationName(response.data)
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
+        },
         getConnectors (siret, application){
             this.connectors = []
             axios.get('/configuration/connectors', {params: {siret, application}})
@@ -166,7 +169,7 @@ export default {
         deleteConnector (id){
             axios.delete(`/configuration/connectors/${id}`)
             .then(() => {
-                this.$router.go()
+                this.initializeConnectors()
             })
             .catch(e => {
                 this.errors.push(e)
