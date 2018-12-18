@@ -22,7 +22,6 @@
                     @hit="organizationSelected = $event"    
                 />
             </div>
-            <div v-if="duplicateErrorMessage !== ''" class="form-group row error-message">{{ duplicateErrorMessage }}</div>
             <input type="button" value="Create" :disabled="disabled" @click="cloneConnector"/>
             <input type="button" value="Cancel" @click="backToConnectorsManagament"/>
         </form>
@@ -98,8 +97,6 @@ export default {
             })
             .catch(e => {
                 this.errors.push(e)
-                this.duplicateErrorMessage = ` ${e}: Connector already exists for application ${this.selectedConnector.applicationName} 
-                and organization ${this.organizationSelected.denominationUniteLegale} (${this.organizationSelected.siret})`
             })
         },
         backToConnectorsManagament (){
