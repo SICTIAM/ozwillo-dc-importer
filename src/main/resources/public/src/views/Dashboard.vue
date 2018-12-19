@@ -5,7 +5,7 @@
             <thead class="thead-dark">
                 <tr>
                     <th>{{ $t('dc_model') }}</th>
-                    <th>{{ $t('created_ago') }}</th>
+                    <th>{{ $t('since') }}</th>
                     <th>{{ $tc('organization') }}</th>
                     <th>{{ $t('state') }}</th>
                 </tr>

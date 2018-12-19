@@ -136,7 +136,7 @@
                 {{ $t('models_processed_for_selected_organization') }}
             </label>
             <select id="organization-model-list" class="form-control-sm" v-model="selectedModelForOrganization">
-                <option>All</option>
+                <option></option>
                 <option v-for="model in resumeOrganization.modelResume">{{model.modelName}}</option>
             </select>
         </div>
