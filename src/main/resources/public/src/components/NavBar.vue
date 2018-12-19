@@ -4,15 +4,15 @@
             <img src="../assets/logo-ozwillo.png" width="30" height="30" class="d-inline-block align-top" alt="logo_ozwillo" />
             <span id="app-name" class="ml-sm-1">DC Importer</span>
         </router-link>
-        <Button
-            className="navbar-toggler"
+        <button
+            class="navbar-toggler"
             data-toggle="collapse"
             data-target="#navbarSupportedContent"
             aria-expanded="false"
             aria-label="Toggle navigation"
             aria-controls="navbarSupportedContent">
-            <span class="navbar-toggler-icon"/>
-        </Button>
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
