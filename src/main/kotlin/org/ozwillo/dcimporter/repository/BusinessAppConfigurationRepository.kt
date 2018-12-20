@@ -10,11 +10,11 @@ import reactor.core.publisher.Mono
 interface BusinessAppConfigurationRepository : ReactiveMongoRepository<BusinessAppConfiguration, String> {
     fun findByApplicationName(applicationName: String): Flux<BusinessAppConfiguration>
 
-    fun findByOriginAppNameIgnoreCaseContaining(
+    fun findByDisplayNameIgnoreCaseContaining(
         applicationName: String
     ): Flux<BusinessAppConfiguration>
 
-    fun findByOrganizationSiretAndOriginAppNameIgnoreCaseContaining(
+    fun findByOrganizationSiretAndDisplayNameIgnoreCaseContaining(
         siret: String,
         applicationName: String
     ): Flux<BusinessAppConfiguration>

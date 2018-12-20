@@ -17,9 +17,9 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
 
     fun searchConnectors(siret: String, appName: String): Flux<BusinessAppConfiguration> {
         return when {
-            !siret.isEmpty() && !appName.isEmpty() -> this.getAllBySiretAndContainingOriginAppName(siret, appName)
+            !siret.isEmpty() && !appName.isEmpty() -> this.getAllBySiretAndContainingDisplayName(siret, appName)
             !siret.isEmpty() && appName.isEmpty() -> this.getAllBySiret(siret)
-            siret.isEmpty() && !appName.isEmpty() -> this.getAllContainingOriginAppName(appName)
+            siret.isEmpty() && !appName.isEmpty() -> this.getAllContainingDisplayName(appName)
             else -> this.getAll()
         }
     }
@@ -40,12 +40,12 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
         return businessAppConfigurationRepository.findByOrganizationSiret(siret)
     }
 
-    fun getAllContainingOriginAppName(appName: String): Flux<BusinessAppConfiguration>{
-        return businessAppConfigurationRepository.findByOriginAppNameIgnoreCaseContaining(appName)
+    fun getAllContainingDisplayName(appName: String): Flux<BusinessAppConfiguration>{
+        return businessAppConfigurationRepository.findByDisplayNameIgnoreCaseContaining(appName)
     }
 
-    fun getAllBySiretAndContainingOriginAppName(siret: String, appName: String): Flux<BusinessAppConfiguration> {
-        return businessAppConfigurationRepository.findByOrganizationSiretAndOriginAppNameIgnoreCaseContaining(siret, appName)
+    fun getAllBySiretAndContainingDisplayName(siret: String, appName: String): Flux<BusinessAppConfiguration> {
+        return businessAppConfigurationRepository.findByOrganizationSiretAndDisplayNameIgnoreCaseContaining(siret, appName)
     }
 
     fun create(siret: String, appName: String, businessAppConfiguration: BusinessAppConfiguration): Mono<HttpStatus> {
@@ -54,7 +54,7 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
             .defaultIfEmpty(
                 BusinessAppConfiguration(
                     applicationName = "",
-                    originAppName = "",
+                    displayName = "",
                     organizationSiret = siret,
                     baseUrl = businessAppConfiguration.baseUrl
                 )
@@ -69,7 +69,7 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
                             login = businessAppConfiguration.login,
                             password = businessAppConfiguration.password,
                             applicationName = appName,
-                            originAppName = businessAppConfiguration.originAppName,
+                            displayName = businessAppConfiguration.displayName,
                             secretOrToken = businessAppConfiguration.secretOrToken
                         )
                     ).subscribe()
@@ -103,7 +103,7 @@ class ConnectorsService(private val businessAppConfigurationRepository: Business
                                 login = businessAppConfiguration.login,
                                 password = businessAppConfiguration.password,
                                 applicationName = appName,
-                                originAppName = businessAppConfiguration.originAppName,
+                                displayName = businessAppConfiguration.displayName,
                                 secretOrToken = businessAppConfiguration.secretOrToken
                             )
                         ).subscribe()

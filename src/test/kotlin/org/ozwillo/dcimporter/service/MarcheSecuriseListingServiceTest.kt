@@ -190,7 +190,7 @@ class MarcheSecuriseListingServiceTest(@Autowired val marcheSecuriseListingServi
         )
         val businessAppConfiguration = BusinessAppConfiguration(
             applicationName = MarcheSecuriseService.name,
-            originAppName = "Marchés Sécurisés",
+            displayName = "Marchés Sécurisés",
             baseUrl = "http://localhost:8089",
             organizationSiret = DCReturnModel.siret,
             login = "login",

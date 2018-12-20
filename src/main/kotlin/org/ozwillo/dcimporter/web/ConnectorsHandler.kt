@@ -35,7 +35,7 @@ class ConnectorsHandler(private val connectorsService: ConnectorsService) {
                             BusinessAppConfiguration(
                                 id = connector.id,
                                 applicationName = connector.applicationName,
-                                originAppName = connector.originAppName,
+                                displayName = connector.displayName,
                                 organizationSiret = connector.organizationSiret,
                                 baseUrl = connector.baseUrl)
                         }
