@@ -1,15 +1,15 @@
 <template>
     <div class="container">
-        <h2>Declared connectors management</h2>
+        <h2>{{ $t('connectors_management') }}</h2>
         <form>
             <div class="form-group row">
                 <label for="cm-claimer-organization" class="col-sm-3 col-form-label col-form-label-sm">
-                    Organization
+                    {{ $tc('organization') }}
                 </label>
                 <vue-bootstrap-typeahead 
                 id="cm-claimer-organization"
                 ref="cmclaimerorganization"
-                placeholder="Search by organization"
+                :placeholder="$t('search_by_organization')"
                 v-model="organizationSearch"
                 :data="organizations"
                 :serializer="displayingResultOfOrganizationSearch"
@@ -19,30 +19,37 @@
             </div>
             <div class="form-group row">
                 <label for="cm-claimer-appName" class="col-sm-3 col-form-label col-form-label-sm">
-                    Application Name
+                    {{ $t('application_name') }}
                 </label>
                 <input 
-                id="cm-claimer-appName"
-                v-model="appName"/>
+                    id="cm-claimer-appName"
+                    :placeholder="$t('search_by_application')"
+                    v-model="appName"/>
             </div>
             <div class="form-group row">
                 <table class="table table-sm">
                     <thead class="thead-dark">
                         <tr>
-                            <th>Application Name</th>
-                            <th>Organization Name</th>
-                            <th>Organization Siret</th>
+                            <th>{{ $t('application_name') }}</th>
+                            <th>{{ $t('organization_name') }}</th>
+                            <th>{{ $t('siret_number') }}</th>
                             <th></th>
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="tbody-connector-management">
                         <tr v-for="connector in connectors">
                             <td>{{connector.applicationName}}</td>
                             <td>{{findOrganizationNameInMap(connector.organizationSiret)}}</td>
                             <td>{{connector.organizationSiret}}</td>
-                            <td>++</td>
-                            <td>X</td>
+                            <td>
+                                <router-link :to="{ name: 'clone', params: { id: connector.id, appName: connector.applicationName, siret: connector.organizationSiret }}" title="clone connector to an other organization">
+                                    ++
+                                </router-link>
+                            </td>
+                            <td>
+                                <input type="button" class="delete-button" value="X" @click="deleteConnector(connector.id)" title="delete connector"/>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -87,14 +94,7 @@ export default {
         }
     },
     created (){
-        axios.get('/configuration/connectors')
-                .then(response => {
-                    this.connectors = response.data
-                    this.findOrganizationName(response.data)
-                })
-                .catch(e => {
-                    this.errors.push(e)
-                })
+        this.initializeConnectors()
     },
     methods: {
         checkOrganizationSearch (){
@@ -147,25 +147,56 @@ export default {
                 this.errors.push(e)
             })
         },
-        getConnectors (siret, appName){
+        initializeConnectors (){
+            axios.get('/configuration/connectors')
+                .then(response => {
+                    this.connectors = response.data
+                    this.findOrganizationName(response.data)
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
+        },
+        getConnectors (siret, application){
             this.connectors = []
-            axios.get('/configuration/connectors?siret=' + siret + '&application=' + appName)
+            axios.get('/configuration/connectors', {params: {siret, application}})
                 .then(response => {
                     this.connectors = response.data
                 })
                 .catch(e => {
                     this.errors.push(e)
                 })
+        },
+        deleteConnector (id){
+            axios.delete(`/configuration/connectors/${id}`)
+            .then(() => {
+                this.initializeConnectors()
+            })
+            .catch(e => {
+                this.errors.push(e)
+            })
         }
     }
 }
 </script>
 
 <style scoped>
+.delete-button{
+    color: red;
+    background-color: white;
+    border: 2px solid red;
+    border-radius: 25px;
+    cursor: pointer;
+}
 .table .thead-dark th {
   color: #fff;
-  background-color: #6f438e;
-  border-color: #32383e;
+  font-weight: normal;
+  background-color: #2C55A2;
+  border-color: #CCC;
+}
+.tbody-connector-management {
+    color: #4c4c4c;
+
 }
 </style>
 

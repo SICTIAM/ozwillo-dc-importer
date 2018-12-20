@@ -1,16 +1,16 @@
 <template>
     <div id="container" class="container">
-        <h2>Dashboard</h2>
-        <table class="table table-sm">
+        <h2>{{ $t('dashboard') }}</h2>
+        <table class="table table-sm table-striped">
             <thead class="thead-dark">
                 <tr>
-                    <th>DC Model</th>
-                    <th>Date</th>
-                    <th>Organization</th>
-                    <th>State</th>
+                    <th>{{ $t('dc_model') }}</th>
+                    <th>{{ $t('since') }}</th>
+                    <th>{{ $tc('organization') }}</th>
+                    <th>{{ $t('state') }}</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="tbody-dashboard">
                 <tr v-for="dataRequest in dataRequests">
                     <td>
                         <router-link :to="{ name: 'check', params: { id: dataRequest.id }}">
@@ -19,7 +19,7 @@
                     </td>
                     <td>{{ dataRequest.creationDate | dateDistanceInWords }}</td>
                     <td>{{ dataRequest.organization }}</td>
-                    <td>{{ dataRequest.state }}</td>
+                    <td class="state-col">{{ dataRequest.state }}</td>
                 </tr>
             </tbody>
         </table>
@@ -54,7 +54,15 @@
 <style scoped>
 .table .thead-dark th {
   color: #fff;
-  background-color: #6f438e;
-  border-color: #32383e;
+  font-weight: normal;
+  background-color: #2C55A2;
+  border-color: #CCC;
+}
+.tbody-dashboard {
+    color: #4c4c4c;
+
+}
+.state-col {
+    color: #E62984;
 }
 </style>
