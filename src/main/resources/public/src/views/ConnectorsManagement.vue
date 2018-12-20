@@ -38,7 +38,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="connector in connectors">
-                            <td>{{connector.applicationName}}</td>
+                            <td>{{connector.originAppName}}</td>
                             <td>{{findOrganizationNameInMap(connector.organizationSiret)}}</td>
                             <td>{{connector.organizationSiret}}</td>
                             <td>++</td>
