@@ -41,6 +41,7 @@
                 </li>
             </ul>
         </div>
+        <a class="btn btn-bd-login d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="/oauth2/authorization/ozwillo">Login</a>
     </nav>
 </template>
 
@@ -62,4 +63,8 @@
   #app-name {
     color: white
   }
+    .btn-bd-login {
+        color: white;
+        border-color: white;
+    }
 </style>
