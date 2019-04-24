@@ -78,7 +78,7 @@ module.exports = {
     },
     devServer: {
         proxy: [{
-            context: ['/actuator', '/api', '/dc', '/configuration'],
+            context: ['/actuator', '/api', '/dc', '/configuration', '/oauth2'],
             target: 'http://localhost:8080',
         }],
         historyApiFallback: true,

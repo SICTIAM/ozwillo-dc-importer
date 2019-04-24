@@ -15,6 +15,20 @@ spring:
   mail:
     host: yourMailHost
     port: 587
+  security:
+    oauth2:
+      client:
+        provider:
+          ozwillo:
+            issuer-uri: ${ozwillo.issuer-uri}/
+        registration:
+          ozwillo:
+            client-id: ${ozwillo.client-id}
+            client-secret: ${ozwillo.client-secret}
+            redirect-uri: http://localhost:8080/callback
+            user-authorization-uri: ${ozwillo.issuer-uri}/a/login
+            client-name: Ozwillo
+            scope: openid, email, profile
 
 server:
   compression.enabled: true
@@ -30,13 +44,6 @@ info: #Informations displayed on actuator/info endpoint TODO: Complete if needed
     name: DC Importer
     version: 0.0.5
     description: See README.md for further information
-
-security:
-  basicAuth:
-    connexion:
-      user: user
-      password: changeme
-      role: DEV
 
 application:
   url: http://localhost:3000
